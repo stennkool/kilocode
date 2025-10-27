@@ -293,6 +293,11 @@ export class GhostProvider {
 		const { prefix, suffix } = extractPrefixSuffix(context.document, position)
 		const languageId = context.document.languageId
 
+		// Check cache before making API call
+		if (this.inlineCompletionProvider.cachedSuggestionAvailable(prefix, suffix)) {
+			return
+		}
+
 		const { systemPrompt, userPrompt } = this.autoTriggerStrategy.getPrompts(
 			autocompleteInput,
 			prefix,
@@ -307,9 +312,6 @@ export class GhostProvider {
 			this.stopProcessing()
 			await this.load()
 		}
-
-		console.log("system", systemPrompt)
-		console.log("userprompt", userPrompt)
 
 		// Initialize the streaming parser
 		this.streamingParser.initialize(context)
